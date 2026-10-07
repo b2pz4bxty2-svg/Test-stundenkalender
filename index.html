@@ -110,9 +110,10 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid 
 .modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 .status-pill{display:inline-block;border-radius:999px;padding:5px 9px;background:#eef2f6;font-size:12px;color:#475467}
 
-/* V27: Schichtauswahl bleibt beim Scrollen auf Laptop/Desktop erreichbar */
+/* V28: Schichtauswahl bleibt an ihrer bisherigen Stelle unter dem Kalender
+   und bleibt auf Laptop/Desktop beim Scrollen unten sichtbar. */
 @media(min-width:761px){
- #quickToolsPanel{position:sticky;top:8px;z-index:80;box-shadow:0 8px 24px rgba(16,46,73,.12)}
+ #quickToolsPanel{position:sticky;bottom:8px;z-index:80;box-shadow:0 -8px 24px rgba(16,46,73,.12)}
 }
 
 @media(max-width:760px){
@@ -265,7 +266,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid 
 <body>
 <header>
  <div class="wrap">
-  <div class="brandline"><svg class="brandmark-svg" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true"><rect x="0" y="0" width="13" height="13" rx="2" fill="#d64045"/></svg><h1>SEKHIL Stundenkalender — MiLoG-Formular · V27</h1></div>
+  <div class="brandline"><svg class="brandmark-svg" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true"><rect x="0" y="0" width="13" height="13" rx="2" fill="#d64045"/></svg><h1>SEKHIL Stundenkalender — MiLoG-Formular · V28</h1></div>
   <div class="sub">Läuft vollständig offline · nichts verlässt dieses Gerät</div>
   <div class="tabs no-print">
    <button id="tabCal" class="active">Kalender</button>
@@ -318,14 +319,6 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid 
   </div>
  </details>
 
- <div class="panel no-print" id="quickToolsPanel">
-  <div class="row spread">
-   <div><div class="section-title">Schicht wählen, dann Tage antippen</div><div class="note">Die Zahl ×N zeigt, wie oft die Schicht im ausgewählten Monat eingetragen ist.</div></div>
-   <div class="row"><button id="secondShift">➕ 2. Schicht</button><button id="undo">↶ Rückgängig</button><button id="repeatWeek">🔁 Erste Woche wiederholen</button></div>
-  </div>
-  <div class="shiftbar" id="shiftBar" style="margin-top:12px"></div>
- </div>
-
  <div class="panel no-print">
   <div class="row spread">
    <div class="section-title" id="calendarViewTitle">Kalender — Schnell ausfüllen</div>
@@ -350,6 +343,13 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid 
   <div id="detailList" class="detail-list hidden"></div>
  </div>
 
+ <div class="panel no-print" id="quickToolsPanel">
+  <div class="row spread">
+   <div><div class="section-title">Schicht wählen, dann Tage antippen</div><div class="note">Die Zahl ×N zeigt, wie oft die Schicht im ausgewählten Monat eingetragen ist.</div></div>
+   <div class="row"><button id="secondShift">➕ 2. Schicht</button><button id="undo">↶ Rückgängig</button><button id="repeatWeek">🔁 Erste Woche wiederholen</button></div>
+  </div>
+  <div class="shiftbar" id="shiftBar" style="margin-top:12px"></div>
+ </div>
 </section>
 
 <section id="printTab" class="hidden">
