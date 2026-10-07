@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEKHIL Stundenkalender — MiLoG</title>
+<style>
+:root{
+  --brand:#173b5d;--brand-dark:#102e49;--accent:#15939a;--accent-soft:#e9f7f7;
+  --red:#d64045;--border:#d6dee7;--text:#172033;--muted:#667085;--bg:#f4f7fa;--card:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(180deg,var(--brand),var(--brand-dark));color:#fff;padding:20px 22px 18px;border-bottom:1px solid #0c2940}
+.wrap,main{max-width:1180px;margin:0 auto}
+.brandline{display:flex;align-items:center;gap:11px}.brandmark{width:13px;height:13px;background:var(--red);border-radius:2px}.brandmark-svg{display:block;flex:0 0 13px}
+h1{margin:0;font-size:25px}.sub{margin-top:5px;color:#dce6ef;font-size:14px}
+.tabs{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+button,.btn,input,select{font:inherit}
+button,.btn{border:1px solid var(--border);background:#fff;border-radius:9px;padding:9px 13px;cursor:pointer;font-weight:650;color:var(--text)}
+header .tabs button{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);color:#fff}
+header .tabs button.active{background:#fff;color:var(--brand)}
+button:hover,.btn:hover{filter:brightness(.98)} button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{color:#b42318;background:#fff1f0;border-color:#fac5c2}
+main{padding:18px 16px 44px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:18px;margin-bottom:18px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.spread{justify-content:space-between}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.contract-grid{display:grid;grid-template-columns:minmax(190px,240px) minmax(0,1fr);gap:14px}
+label{display:block;color:#344054;font-size:13px;margin-bottom:5px;font-weight:650}
+input,select{width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 10px;background:#fff;color:var(--text)}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(21,147,154,.12)}
+.section-title{font-size:17px;font-weight:750;color:var(--brand-dark)}
+.note,.instructions{font-size:13px;color:var(--muted);line-height:1.55}
+.kpi{font-size:12px;color:#5d6b7b;text-transform:uppercase;border:1.5px solid var(--accent);border-radius:12px;padding:11px 18px;text-align:center;min-width:220px;background:#f8ffff}
+.kpi strong{display:block;color:var(--brand);font-size:17px;margin-top:3px}
+.contract-details{padding:0;overflow:hidden}.contract-details summary{list-style:none;cursor:pointer;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.contract-details summary::-webkit-details-marker{display:none}.contract-summary-left{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.contract-summary-text{font-size:13px;color:var(--muted)}.contract-arrow{font-size:12px;color:var(--muted);transition:.15s}
+.contract-details[open] .contract-arrow{transform:rotate(180deg)}.contract-body{border-top:1px solid var(--border);padding:16px}
+.modebar button.active{background:#fff;border-color:#cbd5df;color:var(--brand);box-shadow:0 1px 4px rgba(16,46,73,.1)}
+.calendar-head,.calendar{display:grid;grid-template-columns:repeat(7,1fr)}
+.calendar-head div{font-size:12px;color:var(--muted);font-weight:750;padding:8px;text-align:center}
+.day{min-height:100px;border:1px solid #e0e6ed;margin:-1px 0 0 -1px;padding:7px;background:#fff;cursor:pointer;position:relative;user-select:none}
+.day:hover{background:#fbfcfe}.day.other{background:#f8fafc;color:#98a2b3}.day.today{outline:2px solid var(--accent);outline-offset:-2px}
+.day.selected{background:#eef8f8}.day.holiday{box-shadow:inset 0 3px 0 var(--red)}
+.daynum{font-size:13px;font-weight:800}.dow{font-size:10px;color:#98a2b3;margin-top:1px}
+.tags{display:flex;flex-direction:column;gap:4px;margin-top:6px}.tag{font-size:11px;border-radius:6px;padding:3px 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag.work{background:#eef4ff;color:#3538cd}.tag.urlaub{background:#ecfdf3;color:#027a48}.tag.krank{background:#fff4ed;color:#b54708}.tag.azk{background:#eef8ff;color:#175cd3}.tag.frei{background:#f2f4f7;color:#475467}.tag.feiertag{background:#fff1f0;color:#b42318;font-weight:750}
+.shiftbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}
+.shift{padding:10px;border:1px solid var(--border);border-radius:11px;background:#fff;cursor:pointer;min-width:0}.shift.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(21,147,154,.18)}
+.shift b{display:block;font-size:13px;color:var(--brand)}.shift small{color:var(--muted)}
+.shift[data-shift="nacht"]{background:#eaf0ff}.shift[data-shift="frueh"]{background:#fff4d9}.shift[data-shift="fruehlang"]{background:#fff0e8}.shift[data-shift="spaet"]{background:#f1e8ff}.shift[data-shift="spaetlang"]{background:#fde8ef}.shift[data-shift="urlaub"]{background:#e7f7ec}.shift[data-shift="urlaubhalb"]{background:#e7f7ec}.shift[data-shift="krank"]{background:#fff0e9}.shift[data-shift="azk"]{background:#eef8ff}.shift[data-shift="azkhalb"]{background:#eef8ff}.shift[data-shift="frei"]{background:#f1f3f5}
+.weekstrip{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--border);margin-top:10px}
+.weekday{display:grid;grid-template-columns:72px minmax(0,1fr) 110px;align-items:center;gap:12px;border-bottom:1px solid var(--border);padding:12px 8px;background:#fff;min-height:62px}
+.weekday:hover{background:#fbfcfe}.week-date strong{font-size:19px;color:var(--brand-dark)}.week-date span{display:block;font-size:11px;color:var(--muted)}
+.week-entry{border:1px dashed #d7e0e9;border-radius:8px;padding:9px 11px;min-height:40px;font-size:13px}.week-entry .holiday-note{font-size:11px;color:#b42318;font-weight:700}
+.week-add{justify-self:end}.week-kpi{border:1.5px solid var(--accent);border-radius:9px;padding:5px 10px;text-align:center;font-size:9px;color:var(--muted);min-width:72px}.week-kpi strong{display:block;font-size:15px;color:var(--brand)}
+.week-center{text-align:center}.week-center b{display:block}.week-center span{font-size:11px;color:var(--muted)}
+
+.detail-list{margin-top:12px}.detail-scale{display:grid;grid-template-columns:70px 1fr 66px;align-items:end;font-size:11px;color:#536276;font-weight:700;margin-bottom:4px}
+.detail-scale-line{display:grid;grid-template-columns:repeat(7,1fr);text-align:center}.detail-scale-line span:last-child{text-align:right}
+.detail-day{border:1px solid transparent;border-bottom-color:#dce3eb}.detail-day.open{border:1px solid var(--brand);border-radius:12px;margin:5px 0;overflow:hidden}
+.detail-row{display:grid;grid-template-columns:70px minmax(0,1fr) 66px;align-items:center;gap:10px;padding:7px 8px;cursor:pointer}.detail-row:hover{background:#fbfcfe}
+.detail-day-label{font-size:12px;color:var(--muted)}.detail-day-label b{font-size:17px;color:var(--brand-dark);margin-left:4px}
+.detail-hours{text-align:right;font-weight:800;font-size:14px}
+.timeline{height:38px;position:relative;border:1px solid #e4e9ef;border-radius:7px;overflow:hidden;background:
+ repeating-linear-gradient(to right,#fff 0,#fff calc(8.333% - 1px),#e9eef4 calc(8.333% - 1px),#e9eef4 8.333%)}
+.timeline::after{content:"";position:absolute;left:66.666%;top:0;bottom:0;border-left:1px dashed #9db1c6;pointer-events:none}
+.detail-bar{position:absolute;top:6px;height:26px;border:2px solid #3b5cff;background:#e8edff;border-radius:8px;font-size:11px;font-weight:750;display:flex;align-items:center;padding:0 18px;white-space:nowrap;overflow:visible;color:#2846d7;z-index:2}
+.detail-bar.frueh{border-color:#d48a00;background:#fff4d9;color:#a46300}.detail-bar.fruehlang{border-color:#ef5d23;background:#fff0e8;color:#d74712}.detail-bar.spaet{border-color:#7c4ee4;background:#f1e8ff;color:#6332d0}.detail-bar.spaetlang{border-color:#dc3c6d;background:#fde8ef;color:#bf2b58}
+.detail-handle{position:absolute;top:3px;bottom:3px;width:6px;border-radius:3px;background:currentColor;cursor:ew-resize}.detail-handle.left{left:4px}.detail-handle.right{right:4px}
+.pause-stripe{position:absolute;top:0;bottom:0;min-width:8px;background:repeating-linear-gradient(45deg,rgba(95,107,128,.15),rgba(95,107,128,.15) 4px,rgba(95,107,128,.5) 4px,rgba(95,107,128,.5) 8px);cursor:ew-resize}
+.detail-editor{background:#fbfcfd;border-top:1px solid #dce3eb;padding:14px 16px}
+.detail-quickline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}.detail-quickline input{font-size:14px}.detail-pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.detail-pill{border-radius:999px;padding:7px 12px;background:#fff;font-size:12px}.detail-pill.nacht{border-color:#4164f5;color:#3152df}.detail-pill.frueh{border-color:#d48a00;color:#a46300}.detail-pill.fruehlang{border-color:#ef5d23;color:#d74712}.detail-pill.spaet{border-color:#7c4ee4;color:#6332d0}.detail-pill.spaetlang{border-color:#dc3c6d;color:#bf2b58}.detail-pill.urlaub{border-color:#1b8e4b;color:#067333}.detail-pill.frei{border-color:#8190a3;color:#596779}
+.detail-adjust{border:1px dashed #d7e0e9;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:12px}.adjust-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.adjust-row .label{font-size:11px;font-weight:800;color:#637083}.adjust-row button{padding:6px 10px}
+.second-picks{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}.detail-bottom{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hidden{display:none!important}
+.print-actions{display:flex;gap:10px;flex-wrap:wrap}
+.print-sheet{background:#fff;color:#111;border:1px solid #bbb;padding:20px}
+.print-sheet h2{text-align:center;margin:0 0 14px;font-size:18px;border:1px solid #222;padding:12px}
+.print-official-header{display:flex;align-items:center;justify-content:center;gap:9px;border:1px solid #222;padding:10px 12px;margin:0 0 14px}
+.print-logo-square{width:13px;height:13px;background:var(--red);border-radius:2px;flex:0 0 13px}.print-logo-square-svg{display:block;flex:0 0 13px;width:13px;height:13px;color-adjust:exact;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.print-logo-name{font-size:20px;font-weight:900;letter-spacing:.8px;line-height:1}
+.print-logo-sub{font-size:13px;font-weight:750;margin-left:5px;padding-left:12px;border-left:1px solid #777}
+.simple-print-title{display:none;text-align:center;margin:0 0 10px;font-size:16px;border-bottom:1px solid #444;padding:0 0 7px}
+body.print-simple .official-only{display:none!important}
+body.print-simple .simple-only{display:block!important}
+body.print-official .simple-only{display:none!important}
+.print-meta{font-size:12px;line-height:1.65;margin-bottom:10px}
+.print-meta .line{display:grid;grid-template-columns:220px 1fr;gap:8px}
+.print-checks{font-size:12px;margin:8px 0 12px}
+table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #555;padding:4px;text-align:left;vertical-align:middle}th{background:#f1f3f5;text-align:center}
+.print-table td:first-child,.print-table th:first-child{text-align:center;width:42px}.print-table td:nth-child(6){text-align:center;width:70px}
+.sig{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:38px}.sig div{border-top:1px solid #333;padding-top:6px;font-size:11px}
+.backup-actions{display:flex;gap:10px;flex-wrap:wrap}
+#toast{position:fixed;right:18px;bottom:18px;background:#101828;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;z-index:2000}#toast.show{opacity:1;transform:none}
+
+/* Detail overlay */
+.modal-backdrop{position:fixed;inset:0;background:rgba(16,46,73,.55);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:26px 18px;overflow:auto}
+.modal{width:min(1040px,100%);background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.25)}
+.modal-head{background:var(--brand);color:#fff;padding:22px 26px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.modal-head h2{font-size:22px;margin:0 0 4px}.modal-hours{font-size:18px;font-weight:800;color:#bde8e9}.closex{width:46px;height:46px;padding:0;font-size:25px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:#fff}
+.modal-body{padding:24px 26px}.quickgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.quickbtn{text-align:left;background:#edac32;border-color:#edac32;color:#332200;font-size:15px;padding:13px 16px}
+.quickbtn.selected{outline:3px solid #9fd7da}.quickbtn strong{display:block}.manual-box{border:1px dashed #d5dde6;border-radius:14px;padding:16px;margin-top:14px}
+.timegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.timegrid input{font-size:17px}
+.checkline{display:flex;align-items:center;gap:9px;margin-top:14px}.checkline input{width:auto;transform:scale(1.25)}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.status-pill{display:inline-block;border-radius:999px;padding:5px 9px;background:#eef2f6;font-size:12px;color:#475467}
+
+@media(max-width:760px){
+ .contract-grid,.grid2,.quickgrid,.timegrid{grid-template-columns:1fr}
+ .calendar-head div{font-size:10px}.day{min-height:80px;padding:5px}.weekday{grid-template-columns:58px 1fr}.week-add{grid-column:2}.detail-row,.detail-scale{grid-template-columns:52px 1fr 46px}
+ .print-meta .line{grid-template-columns:1fr}.modal-backdrop{padding:10px}.modal-body{padding:18px}.modal-head{padding:18px}
+ .kpi{min-width:0;width:100%}
+}
+@media print{
+ *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+ body{
+  background:#fff;
+  font-size:10px;
+ }
+ header,#calendarTab,#backupTab,.no-print,#detailModal,#toast{
+  display:none!important;
+ }
+ main{
+  max-width:none;
+  margin:0;
+  padding:0;
+ }
+ #printTab{
+  display:block!important;
+ }
+ .panel{
+  border:none;
+  box-shadow:none;
+  padding:0;
+  margin:0;
+ }
+ .print-sheet{
+  border:none;
+  padding:0;
+  margin:0 auto!important;
+  font-size:10px;
+  width:100%!important;
+  max-width:194mm!important;
+  page-break-inside:avoid;
+  break-inside:avoid-page;
+  overflow:visible!important;
+ }
+ .print-sheet h2{
+  font-size:16px;
+  line-height:1.1;
+  margin:0 0 5px;
+  padding:6px;
+  text-align:center;
+ }
+ .print-official-header{
+  padding:6px 8px;
+  margin:0 0 5px;
+  gap:7px;
+ }
+ .print-logo-square{width:10px;height:10px;flex-basis:10px}
+ .print-logo-square-svg{width:10px!important;height:10px!important;flex-basis:10px!important;color-adjust:exact;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .print-logo-name{font-size:16px}
+ .print-logo-sub{font-size:10px;padding-left:8px;margin-left:2px}
+ .simple-print-title{font-size:14px;margin:0 0 5px;padding-bottom:5px}
+ body.print-simple .print-sheet{max-width:194mm!important}
+ .print-meta{
+  font-size:10px;
+  line-height:1.2;
+  margin-bottom:4px;
+ }
+ .print-meta .line{
+  grid-template-columns:52mm 1fr;
+  gap:4px;
+ }
+ .print-checks{
+  font-size:10px;
+  line-height:1.15;
+  margin:2px 0 5px;
+ }
+ .print-table{
+  width:100%!important;
+  margin:0 auto!important;
+  table-layout:fixed;
+  font-size:10px;
+  line-height:1.05;
+ }
+ .print-table th,
+ .print-table td{
+  padding:2px 3px;
+  height:15px;
+  min-height:15px;
+  white-space:nowrap;
+  vertical-align:middle;
+ }
+ .print-table thead th{
+  height:24px;
+  line-height:1.05;
+  text-align:center!important;
+ }
+ .print-table tfoot th{
+  height:18px;
+ }
+ .print-table tr{
+  page-break-inside:avoid;
+  break-inside:avoid;
+ }
+ /* kompakte feste Spaltenbreiten fuer A4 Hochformat */
+ .print-table th:nth-child(1),.print-table td:nth-child(1){width:8mm!important;}
+ .print-table th:nth-child(2),.print-table td:nth-child(2){width:25mm!important;}
+ .print-table th:nth-child(3),.print-table td:nth-child(3){width:25mm!important;}
+ .print-table th:nth-child(4),.print-table td:nth-child(4){width:24mm!important;}
+ .print-table th:nth-child(5),.print-table td:nth-child(5){width:24mm!important;}
+ .print-table th:nth-child(6),.print-table td:nth-child(6){width:18mm!important;}
+ .print-table th:nth-child(7),.print-table td:nth-child(7){width:auto!important;}
+ /* Zahlen, Uhrzeiten und Stunden mittig; Hinweistext links */
+ .print-table td:nth-child(1),
+ .print-table td:nth-child(2),
+ .print-table td:nth-child(3),
+ .print-table td:nth-child(4),
+ .print-table td:nth-child(5),
+ .print-table td:nth-child(6){
+  text-align:center!important;
+ }
+ .print-table td:nth-child(7){
+  text-align:left!important;
+  white-space:normal;
+ }
+ .sig{
+  grid-template-columns:1fr 1fr;
+  gap:22mm;
+  margin-top:12px;
+ }
+ .sig div{
+  font-size:9px;
+  padding-top:3px;
+ }
+ html,body{
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+ }
+ main,#printTab,.panel{
+  width:100%!important;
+  max-width:none!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+ }
+ @page{
+  size:A4 portrait;
+  margin:8mm;
+ }
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="wrap">
+  <div class="brandline"><svg class="brandmark-svg" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true"><rect x="0" y="0" width="13" height="13" rx="2" fill="#d64045"/></svg><h1>SEKHIL Stundenkalender — MiLoG-Formular · V26</h1></div>
+  <div class="sub">Läuft vollständig offline · nichts verlässt dieses Gerät</div>
+  <div class="tabs no-print">
+   <button id="tabCal" class="active">Kalender</button>
+   <button id="tabPrint">Formular (Druck / PDF)</button>
+   <button id="tabBackup">Daten & Backup</button>
+  </div>
+ </div>
+</header>
+
+<main>
+<section id="calendarTab">
+ <div class="panel">
+  <div class="row spread">
+   <div class="row">
+    <button id="prevMonth">← Voriger Monat</button>
+    <select id="monthSelect" style="width:auto"></select>
+    <select id="yearSelect" style="width:auto"></select>
+    <button id="nextMonth">Nächster Monat →</button>
+   </div>
+   <div class="kpi">Gesamtstunden diesen Monat<strong id="monthHours">0,00 h</strong></div>
+  </div>
+ </div>
+
+ <details class="panel contract-details" id="contractDetails">
+  <summary>
+   <div class="contract-summary-left">
+    <strong>Vertragsdaten</strong>
+    <span class="contract-summary-text">(erscheinen automatisch im Formular)</span>
+    <span class="contract-summary-text" id="contractSummary"></span>
+   </div>
+   <span class="contract-arrow">▲</span>
+  </summary>
+  <div class="contract-body">
+   <div class="contract-grid">
+    <div><label>MANDANTEN-NR.</label><input id="clientNo" placeholder="z. B. 12345"></div>
+    <div><label>ARBEITGEBERNAME</label><input id="employer" placeholder="z. B. SEKHIL"></div>
+    <div><label>PERS.NR.</label><input id="personNo" placeholder="z. B. 001"></div>
+    <div><label>ARBEITNEHMERNAME (VOR- UND NACHNAME)</label><input id="employee" placeholder="z. B. Vorname Nachname"></div>
+    <div><label>STUNDENLOHN (€ / STD.)</label><input id="hourlyWage" inputmode="decimal" placeholder="z. B. 15,00"></div>
+    <div><label>BUNDESLAND (FÜR FEIERTAGE)</label>
+     <select id="stateSelect">
+      <option value="">Nur bundesweite Feiertage</option><option value="BW">Baden-Württemberg</option><option value="BY">Bayern</option>
+      <option value="BE">Berlin</option><option value="BB">Brandenburg</option><option value="HB">Bremen</option><option value="HH">Hamburg</option>
+      <option value="HE">Hessen</option><option value="MV">Mecklenburg-Vorpommern</option><option value="NI">Niedersachsen</option><option value="NW">Nordrhein-Westfalen</option>
+      <option value="RP">Rheinland-Pfalz</option><option value="SL">Saarland</option><option value="SN">Sachsen</option><option value="ST">Sachsen-Anhalt</option>
+      <option value="SH">Schleswig-Holstein</option><option value="TH">Thüringen</option>
+     </select>
+    </div>
+   </div>
+  </div>
+ </details>
+
+ <div class="panel no-print">
+  <div class="row spread">
+   <div class="section-title" id="calendarViewTitle">Kalender — Schnell ausfüllen</div>
+   <div class="row modebar">
+    <button data-mode="week">🗓️ Woche</button><button data-mode="quick" class="active">⚡ Schnell</button><button data-mode="detail">✏️ Detail</button>
+   </div>
+  </div>
+  <div class="instructions" id="viewInstructions"></div>
+  <div id="weekControls" class="hidden" style="margin-top:12px">
+   <div class="row spread">
+    <button id="prevWeek">‹</button>
+    <div class="week-center"><b id="weekLabel">KW</b><span id="weekRange"></span></div>
+    <div class="row"><button id="nextWeek">›</button><div class="week-kpi">WOCHE<strong id="weekHours">0 h</strong></div></div>
+   </div>
+   <div class="weekstrip" id="weekStrip"></div>
+   <div class="row" style="margin-top:10px"><button id="todayWeek">Heute</button><button id="copyWeek">⧉ Woche in nächste kopieren</button><button id="undoWeek">↶ Rückgängig</button></div>
+  </div>
+  <div id="monthCalendar" style="margin-top:12px">
+   <div class="calendar-head"><div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div><div>So</div></div>
+   <div class="calendar" id="calendar"></div>
+  </div>
+  <div id="detailList" class="detail-list hidden"></div>
+ </div>
+
+ <div class="panel no-print" id="quickToolsPanel">
+  <div class="row spread">
+   <div><div class="section-title">Schicht wählen, dann Tage antippen</div><div class="note">Die Zahl ×N zeigt, wie oft die Schicht im ausgewählten Monat eingetragen ist.</div></div>
+   <div class="row"><button id="secondShift">➕ 2. Schicht</button><button id="undo">↶ Rückgängig</button><button id="repeatWeek">🔁 Erste Woche wiederholen</button></div>
+  </div>
+  <div class="shiftbar" id="shiftBar" style="margin-top:12px"></div>
+ </div>
+</section>
+
+<section id="printTab" class="hidden">
+ <div class="panel no-print">
+  <div class="row spread">
+   <div>
+    <div class="section-title">Formular (Druck / PDF)</div>
+    <div class="note" id="printInfo">Monatsnachweis</div>
+   </div>
+   <div class="print-actions">
+    <button id="officialPrint" class="primary">📄 Offizielles PDF erzeugen</button>
+    <button id="simplePrint">🖨️ Einfache Ansicht drucken</button>
+   </div>
+  </div>
+ </div>
+ <div class="print-sheet" id="printSheet"></div>
+</section>
+
+<section id="backupTab" class="hidden">
+ <div class="panel">
+  <div class="section-title">Kopfdaten (gelten für alle Monate)</div>
+  <div class="contract-grid">
+   <div><label>MANDANTEN-NR.</label><input id="bClientNo" placeholder="z. B. 12345"></div>
+   <div><label>ARBEITGEBERNAME</label><input id="bEmployer" placeholder="z. B. SEKHIL"></div>
+   <div><label>PERS.NR.</label><input id="bPersonNo" placeholder="z. B. 001"></div>
+   <div><label>ARBEITNEHMERNAME</label><input id="bEmployee" placeholder="z. B. Vorname Nachname"></div>
+   <div><label>STUNDENLOHN (€ / STD.)</label><input id="bHourlyWage" inputmode="decimal" placeholder="z. B. 15,00"></div>
+   <div><label>BUNDESLAND</label><select id="bStateSelect"></select></div>
+  </div>
+  <div style="margin-top:14px">
+   <div class="section-title" style="font-size:14px;margin-bottom:8px">Beschäftigungsart</div>
+   <div style="display:grid;gap:10px;align-items:start">
+    <label><input type="radio" name="empType" id="empMini" value="mini" style="width:auto"> Geringfügige Beschäftigung (Minijob)</label>
+    <div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center">
+     <label><input type="radio" name="empType" id="empPart" value="part" style="width:auto"> Teilzeit</label>
+     <div id="partHoursBox" style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:10px">
+      <label><input type="radio" name="partHours" id="part20" value="20" style="width:auto"> 20 Std.</label>
+      <label><input type="radio" name="partHours" id="part25" value="25" style="width:auto"> 25 Std.</label>
+      <label><input type="radio" name="partHours" id="part30" value="30" style="width:auto"> 30 Std.</label>
+      <label><input type="radio" name="partHours" id="part35" value="35" style="width:auto"> 35 Std.</label>
+      <label><input type="radio" name="partHours" id="partOtherRadio" value="other" style="width:auto"> Andere:</label>
+      <input id="partOtherHours" type="number" min="1" max="39.99" step="0.25" placeholder="Std." style="width:90px">
+     </div>
+    </div>
+    <label><input type="radio" name="empType" id="empFull" value="full" style="width:auto"> Vollzeit – 40 Std./Woche</label>
+   </div>
+  </div>
+  <button id="saveMeta" class="primary" style="margin-top:12px">Speichern</button>
+ </div>
+ <div class="panel">
+  <div class="section-title">Backup</div>
+  <p class="note">Die Daten werden nur in diesem Browser/Gerät gespeichert (localStorage). Exportiere regelmäßig eine JSON-Sicherungskopie.</p>
+  <div class="backup-actions">
+   <button id="exportJson">⬇️ JSON exportieren</button>
+   <label class="btn">⬆️ JSON importieren<input id="importJson" type="file" accept="application/json" class="hidden"></label>
+   <button id="deleteMonth" class="danger">🗑️ Nur aktuellen Monat löschen</button>
+  </div>
+ </div>
+</section>
+</main>
+
+<div id="detailModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+ <div class="modal">
+  <div class="modal-head">
+   <div><h2 id="detailTitle">Tag</h2><div class="modal-hours" id="detailHours">0 Std.</div></div>
+   <button id="closeDetail" class="closex" aria-label="Schließen">×</button>
+  </div>
+  <div class="modal-body">
+   <div class="note"><b>Schnellauswahl:</b> Ein Klick übernimmt den Turn als erste Schicht.</div>
+   <div class="quickgrid" id="detailQuickGrid" style="margin-top:10px"></div>
+
+   <div class="checkline">
+    <input type="checkbox" id="detailSecondToggle"><label for="detailSecondToggle" style="margin:0">ZWEITE SCHICHT HINZUFÜGEN</label>
+    <button id="detailCopyPrev">↗ Tag davor kopieren</button>
+   </div>
+
+   <div class="note" style="margin-top:18px"><b>Manuelle Eingabe:</b> Passe Beginn, Ende und Pause bei Bedarf an.</div>
+   <div class="manual-box">
+    <div class="section-title" style="font-size:15px">Schicht 1</div>
+    <div class="timegrid">
+     <div><label>BEGINN</label><input type="time" id="s1start"></div><div><label>ENDE</label><input type="time" id="s1end"></div>
+     <div><label>PAUSE VON</label><input type="time" id="s1p1"></div><div><label>PAUSE BIS</label><input type="time" id="s1p2"></div>
+    </div>
+   </div>
+   <div class="manual-box hidden" id="shift2Box">
+    <div class="section-title" style="font-size:15px">Schicht 2</div>
+    <div class="timegrid">
+     <div><label>BEGINN</label><input type="time" id="s2start"></div><div><label>ENDE</label><input type="time" id="s2end"></div>
+     <div><label>PAUSE VON</label><input type="time" id="s2p1"></div><div><label>PAUSE BIS</label><input type="time" id="s2p2"></div>
+    </div>
+   </div>
+
+   <div style="margin-top:14px"><label>ENTLOHNUNGSART (OPTIONAL)</label><input id="payType" placeholder="leer lassen, falls nicht zutreffend"></div>
+   <div class="modal-actions">
+    <button id="detailPrev">← Voriger Tag</button><button id="detailNext">Nächster Tag →</button>
+    <button id="detailDelete" class="danger">Tag löschen</button><button id="detailDone" class="primary">Fertig</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(()=>{
+const el=id=>document.getElementById(id);
+const tabCal=el('tabCal'),
+      tabPrint=el('tabPrint'),
+      tabBackup=el('tabBackup'),
+      calendarTab=el('calendarTab'),
+      prevMonth=el('prevMonth'),
+      monthSelect=el('monthSelect'),
+      yearSelect=el('yearSelect'),
+      nextMonth=el('nextMonth'),
+      monthHours=el('monthHours'),
+      contractDetails=el('contractDetails'),
+      contractSummary=el('contractSummary'),
+      clientNo=el('clientNo'),
+      employer=el('employer'),
+      personNo=el('personNo'),
+      employee=el('employee'),
+      hourlyWage=el('hourlyWage'),
+      stateSelect=el('stateSelect'),
+      calendarViewTitle=el('calendarViewTitle'),
+      viewInstructions=el('viewInstructions'),
+      weekControls=el('weekControls'),
+      prevWeek=el('prevWeek'),
+      weekLabel=el('weekLabel'),
+      weekRange=el('weekRange'),
+      nextWeek=el('nextWeek'),
+      weekHours=el('weekHours'),
+      weekStrip=el('weekStrip'),
+      todayWeek=el('todayWeek'),
+      copyWeek=el('copyWeek'),
+      undoWeek=el('undoWeek'),
+      monthCalendar=el('monthCalendar'),
+      calendar=el('calendar'),
+      detailList=el('detailList'),
+      quickToolsPanel=el('quickToolsPanel'),
+      secondShift=el('secondShift'),
+      undo=el('undo'),
+      repeatWeek=el('repeatWeek'),
+      shiftBar=el('shiftBar'),
+      printTab=el('printTab'),
+      printInfo=el('printInfo'),
+      officialPrint=el('officialPrint'),
+      simplePrint=el('simplePrint'),
+      printSheet=el('printSheet'),
+      backupTab=el('backupTab'),
+      bClientNo=el('bClientNo'),
+      bEmployer=el('bEmployer'),
+      bPersonNo=el('bPersonNo'),
+      bEmployee=el('bEmployee'),
+      bHourlyWage=el('bHourlyWage'),
+      bStateSelect=el('bStateSelect'),
+      empMini=el('empMini'),
+      empPart=el('empPart'),
+      partHoursBox=el('partHoursBox'),
+      part20=el('part20'),
+      part25=el('part25'),
+      part30=el('part30'),
+      part35=el('part35'),
+      partOtherRadio=el('partOtherRadio'),
+      partOtherHours=el('partOtherHours'),
+      empFull=el('empFull'),
+      saveMeta=el('saveMeta'),
+      exportJson=el('exportJson'),
+      importJson=el('importJson'),
+      deleteMonth=el('deleteMonth'),
+      detailModal=el('detailModal'),
+      detailTitle=el('detailTitle'),
+      detailHours=el('detailHours'),
+      closeDetail=el('closeDetail'),
+      detailQuickGrid=el('detailQuickGrid'),
+      detailSecondToggle=el('detailSecondToggle'),
+      detailCopyPrev=el('detailCopyPrev'),
+      s1start=el('s1start'),
+      s1end=el('s1end'),
+      s1p1=el('s1p1'),
+      s1p2=el('s1p2'),
+      shift2Box=el('shift2Box'),
+      s2start=el('s2start'),
+      s2end=el('s2end'),
+      s2p1=el('s2p1'),
+      s2p2=el('s2p2'),
+      payType=el('payType'),
+      detailPrev=el('detailPrev'),
+      detailNext=el('detailNext'),
+      detailDelete=el('detailDelete'),
+      detailDone=el('detailDone');
+const KEY='sekhil_milog_v25_clean';
+const months=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const dowLong=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const dowShort=['So','Mo','Di','Mi','Do','Fr','Sa'];
+const shifts=[
+ {id:'nacht',label:'🌙 Nacht',short:'Nacht',start:'22:30',end:'07:00',p1:'03:00',p2:'03:30'},
+ {id:'frueh',label:'🌅 Früh',short:'Früh',start:'06:30',end:'14:00',p1:'10:00',p2:'10:30'},
+ {id:'fruehlang',label:'🌅 Früh lang',short:'Früh lang',start:'06:30',end:'15:00',p1:'10:00',p2:'10:30'},
+ {id:'spaet',label:'🌆 Spät',short:'Spät',start:'14:30',end:'22:30',p1:'18:00',p2:'18:30'},
+ {id:'spaetlang',label:'🌆 Spät lang',short:'Spät lang',start:'14:30',end:'23:00',p1:'18:00',p2:'18:30'},
+ {id:'urlaub',label:'🏖️ Urlaub',short:'Urlaub',status:'Urlaub'},
+ {id:'urlaubhalb',label:'🏖️ ½ Urlaub',short:'0,5 Tag Urlaub',status:'Urlaub halb'},
+ {id:'krank',label:'🤒 Krank',short:'Krank',status:'Krank'},
+ {id:'azk',label:'⏱️ AZK',short:'AZK',status:'AZK'},
+ {id:'azkhalb',label:'⏱️ ½ AZK',short:'0,5 AZK',status:'AZK halb'},
+ {id:'frei',label:'○ Frei',short:'Frei',status:'Frei'}
+];
+const detailPresets=[
+ {label:'🌙 Nacht',start:'22:30',end:'07:00',p1:'03:00',p2:'03:30'},
+ {label:'🌅 Frühschicht',start:'06:30',end:'14:00',p1:'10:00',p2:'10:30'},
+ {label:'🌙 Lange Nacht',start:'22:00',end:'08:00',p1:'03:00',p2:'03:30'},
+ {label:'🌙 Langer Samstag',start:'19:00',end:'07:00',p1:'00:30',p2:'01:00'}
+];
+
+function baseState(){return {meta:{clientNo:'',employer:'',personNo:'',employee:'',hourlyWage:'',state:'',empType:'',partHours:'',partOther:''},days:{}}}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.meta&&x.days?x:baseState()}catch{return baseState()}}
+let state=load(),history=[],now=new Date();
+let view={y:now.getFullYear(),m:now.getMonth(),mode:'quick',selectedShift:'nacht',second:false,selectedDate:null,weekStart:startOfWeek(now)};
+let drag=false,dragged=new Set(),longTimer=null,longTriggered=false;
+
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function snap(){history.push(JSON.stringify(state));if(history.length>60)history.shift()}
+function undoAction(){if(!history.length)return toast('Nichts zum Rückgängigmachen');state=JSON.parse(history.pop());save();syncMeta();renderAll();toast('Rückgängig')}
+function pad(n){return String(n).padStart(2,'0')}
+function keyDate(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function dateFromKey(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
+function startOfWeek(d){const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));x.setHours(0,0,0,0);return x}
+function isoWeek(d){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return Math.ceil((((x-y)/86400000)+1)/7)}
+function mins(t){if(!t)return 0;const [h,m]=t.split(':').map(Number);return h*60+m}
+function duration(s,e){if(!s||!e)return 0;let a=mins(s),b=mins(e);if(b<a)b+=1440;return b-a}
+function shiftMinutes(s){if(!s?.start||!s?.end)return 0;let n=duration(s.start,s.end);if(s.p1&&s.p2)n-=duration(s.p1,s.p2);return Math.max(0,n)}
+function dayMinutes(d){
+ if(!d)return 0;
+ if(d.status==='Urlaub')return 8*60;
+ if(d.status==='Urlaub halb')return 4*60;
+ if(d.status==='Krank')return 8*60;
+ if(d.status==='AZK')return 8*60;
+ if(d.status==='AZK halb')return 4*60;
+ if(d.status)return 0;
+ return shiftMinutes(d.s1)+shiftMinutes(d.s2)
+}
+function fmtHours(n){return (n/60).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' h'}
+function fmtHoursCompact(n){const x=n/60;return Number.isInteger(x)?`${x} h`:`${x.toLocaleString('de-DE',{maximumFractionDigits:2})} h`}
+function fmtHM(n){return `${Math.floor(n/60)}:${pad(n%60)}`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+
+function easterSunday(year){
+ const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3);
+ const h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+ const mon=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;return new Date(year,mon-1,day)
+}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function holidayMap(y,st){
+ const h={},add=(d,n)=>h[keyDate(d)]=n,fixed=(m,d,n)=>add(new Date(y,m-1,d),n),e=easterSunday(y);
+ fixed(1,1,'Neujahr');add(addDays(e,-2),'Karfreitag');add(addDays(e,1),'Ostermontag');fixed(5,1,'Tag der Arbeit');
+ add(addDays(e,39),'Christi Himmelfahrt');add(addDays(e,50),'Pfingstmontag');fixed(10,3,'Tag der Deutschen Einheit');fixed(12,25,'1. Weihnachtstag');fixed(12,26,'2. Weihnachtstag');
+ if(['BW','BY','ST'].includes(st))fixed(1,6,'Heilige Drei Könige');
+ if(['BW','BY','HE','NW','RP','SL'].includes(st))add(addDays(e,60),'Fronleichnam');
+ if(['BW','BY','NW','RP','SL'].includes(st))fixed(11,1,'Allerheiligen');
+ if(['BB','HB','HH','MV','NI','SN','ST','SH','TH'].includes(st))fixed(10,31,'Reformationstag');
+ if(['BE','MV'].includes(st))fixed(3,8,'Internationaler Frauentag');
+ if(st==='SL')fixed(8,15,'Mariä Himmelfahrt');
+ if(st==='TH')fixed(9,20,'Weltkindertag');
+ if(st==='SN'){let d=new Date(y,10,22);while(d.getDay()!==3)d.setDate(d.getDate()-1);add(d,'Buß- und Bettag')}
+ if(st==='BB'){add(e,'Ostersonntag');add(addDays(e,49),'Pfingstsonntag')}
+ return h
+}
+function holidayFor(d){return holidayMap(d.getFullYear(),state.meta.state||'')[keyDate(d)]||''}
+
+function init(){
+ monthSelect.innerHTML=months.map((x,i)=>`<option value="${i}">${x}</option>`).join('');
+ const ys=[];for(let y=now.getFullYear()-5;y<=now.getFullYear()+5;y++)ys.push(y);yearSelect.innerHTML=ys.map(y=>`<option>${y}</option>`).join('');
+ bStateSelect.innerHTML=stateSelect.innerHTML;
+ detailQuickGrid.innerHTML=detailPresets.map((p,i)=>`<button type="button" class="quickbtn" data-preset="${i}"><strong>${p.label}</strong>${p.start}–${p.end} · Pause ${p.p1}–${p.p2}</button>`).join('');
+ document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>applyPreset(+b.dataset.preset)));
+ syncMeta();bind();setMode(view.mode);renderAll()
+}
+function syncMeta(){
+ clientNo.value=state.meta.clientNo||'';employer.value=state.meta.employer||'';personNo.value=state.meta.personNo||'';employee.value=state.meta.employee||'';hourlyWage.value=state.meta.hourlyWage||'';stateSelect.value=state.meta.state||'';
+ bClientNo.value=state.meta.clientNo||'';bEmployer.value=state.meta.employer||'';bPersonNo.value=state.meta.personNo||'';bEmployee.value=state.meta.employee||'';bHourlyWage.value=state.meta.hourlyWage||'';bStateSelect.value=state.meta.state||'';
+ empMini.checked=state.meta.empType==='mini';empPart.checked=state.meta.empType==='part';empFull.checked=state.meta.empType==='full';
+ const ph=String(state.meta.partHours||'');
+ [part20,part25,part30,part35,partOtherRadio].forEach(x=>x.checked=false);
+ if(ph==='20')part20.checked=true;else if(ph==='25')part25.checked=true;else if(ph==='30')part30.checked=true;else if(ph==='35')part35.checked=true;else if(ph==='other')partOtherRadio.checked=true;
+ partOtherHours.value=state.meta.partOther||'';updateEmploymentUI();
+ contractSummary.textContent=((state.meta.employee||'').trim()?state.meta.employee.trim()+' · ':'')+(state.meta.employer||'')
+}
+function updateEmploymentUI(){
+ const active=empPart.checked;
+ partHoursBox.style.opacity=active?'1':'.58';
+ partHoursBox.style.background=active?'':'#fafafa';
+}
+function selectedPartHours(){
+ const x=document.querySelector('input[name="partHours"]:checked');return x?x.value:''
+}
+function pullEmploymentFromBackup(){
+ const t=document.querySelector('input[name="empType"]:checked');state.meta.empType=t?t.value:'';
+ state.meta.partHours=state.meta.empType==='part'?selectedPartHours():'';
+ state.meta.partOther=(state.meta.empType==='part'&&state.meta.partHours==='other')?partOtherHours.value.trim():'';
+}
+function pullMeta(){
+ state.meta.clientNo=clientNo.value.trim();state.meta.employer=employer.value.trim();state.meta.personNo=personNo.value.trim();state.meta.employee=employee.value.trim();state.meta.hourlyWage=hourlyWage.value.trim();state.meta.state=stateSelect.value;save();syncMeta()
+}
+function showTab(name){
+ calendarTab.classList.toggle('hidden',name!=='cal');printTab.classList.toggle('hidden',name!=='print');backupTab.classList.toggle('hidden',name!=='backup');
+ tabCal.classList.toggle('active',name==='cal');tabPrint.classList.toggle('active',name==='print');tabBackup.classList.toggle('active',name==='backup');
+ if(name==='print')renderPrint()
+}
+function shiftCount(id){
+ let n=0,s=shifts.find(x=>x.id===id);
+ Object.entries(state.days).forEach(([k,v])=>{const d=dateFromKey(k);if(d.getFullYear()!==view.y||d.getMonth()!==view.m)return;
+  if(s.status&&v.status===s.status)n++;
+  else if(!s.status&&((v.s1?.label===s.short)||(v.s2?.label===s.short)))n++
+ });return n
+}
+function renderShiftBar(){
+ shiftBar.innerHTML=shifts.map(s=>{const c=shiftCount(s.id);return `<div class="shift ${view.selectedShift===s.id?'active':''}" data-shift="${s.id}">
+ <b>${s.label}${c?` <span style="float:right">×${c}</span>`:''}</b><small>${s.status?s.short:(s.start+'–'+s.end)}</small></div>`}).join('');
+ document.querySelectorAll('[data-shift]').forEach(x=>x.onclick=()=>{view.selectedShift=x.dataset.shift;renderShiftBar()});
+ secondShift.classList.toggle('active',view.second);
+ secondShift.textContent=view.second?'➕ 2. Schicht: AN':'➕ 2. Schicht'
+}
+function dayTagHTML(item,hol){
+ let tags='';if(hol)tags+=`<div class="tag feiertag">${esc(hol)}</div>`;
+ if(item){
+  if(item.status){
+   const label=item.status==='Urlaub halb'?'0,5 Tag Urlaub · 4 h':item.status==='Urlaub'?'Urlaub · 8 h':item.status==='Krank'?'Krank · 8 h':item.status==='AZK halb'?'0,5 AZK · 4 h':item.status==='AZK'?'AZK · 8 h':item.status;
+   tags+=`<div class="tag ${item.status.startsWith('Urlaub')?'urlaub':item.status.toLowerCase()}">${esc(label)}</div>`;
+  }
+  else{
+   if(item.s1)tags+=`<div class="tag work">${esc(item.s1.start)}–${esc(item.s1.end)} · ${fmtHoursCompact(shiftMinutes(item.s1))}</div>`;
+   if(item.s2)tags+=`<div class="tag work">2. ${esc(item.s2.start)}–${esc(item.s2.end)} · ${fmtHoursCompact(shiftMinutes(item.s2))}</div>`
+  }
+ }
+ return tags
+}
+function renderCalendar(){
+ monthSelect.value=view.m;yearSelect.value=view.y;
+ const first=new Date(view.y,view.m,1),off=(first.getDay()+6)%7,start=new Date(view.y,view.m,1-off);calendar.innerHTML='';
+ for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=keyDate(d),item=state.days[k],hol=holidayFor(d);
+  const cell=document.createElement('div');cell.dataset.date=k;cell.className='day'+(d.getMonth()!==view.m?' other':'')+(keyDate(d)===keyDate(now)?' today':'')+(view.selectedDate===k?' selected':'')+(hol?' holiday':'');
+  cell.innerHTML=`<div class="daynum">${d.getDate()}</div><div class="dow">${dowShort[d.getDay()]}</div><div class="tags">${dayTagHTML(item,hol)}</div>`;calendar.appendChild(cell)
+ }
+ let total=0;Object.entries(state.days).forEach(([k,v])=>{const d=dateFromKey(k);if(d.getFullYear()===view.y&&d.getMonth()===view.m)total+=dayMinutes(v)});monthHours.textContent=fmtHours(total)
+}
+function statusText(it){
+ if(!it)return 'Frei';
+ if(it.status==='Urlaub')return 'Urlaub';
+ if(it.status==='Urlaub halb')return '0,5 Tag Urlaub';
+ if(it.status==='Krank')return 'Krank';
+ if(it.status==='AZK')return 'AZK';
+ if(it.status==='AZK halb')return '0,5 AZK';
+ if(it.status==='Frei')return 'Frei';
+ const bits=[];
+ if(it.s1)bits.push(`${it.s1.start}–${it.s1.end}`);
+ if(it.s2)bits.push(`${it.s2.start}–${it.s2.end}`);
+ return bits.join(' · ')||'Frei'
+}
+function detailHoursText(n){
+ const h=n/60;
+ return (Number.isInteger(h)?String(h):h.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}))+' h'
+}
+function renderWeek(){
+ const end=new Date(view.weekStart);end.setDate(end.getDate()+6);
+ weekLabel.textContent=`KW ${isoWeek(view.weekStart)}`;
+ weekRange.textContent=`${pad(view.weekStart.getDate())}.${pad(view.weekStart.getMonth()+1)}.–${pad(end.getDate())}.${pad(end.getMonth()+1)}.${end.getFullYear()}`;
+ weekStrip.innerHTML='';let total=0;
+ for(let i=0;i<7;i++){
+  const d=new Date(view.weekStart);d.setDate(d.getDate()+i);const k=keyDate(d),it=state.days[k],hol=holidayFor(d),dm=dayMinutes(it);total+=dm;
+  const e=document.createElement('div');e.className='weekday';
+  e.innerHTML=`<div class="week-date"><strong>${d.getDate()}</strong><span>${dowShort[d.getDay()]}</span>${hol?`<span style="color:#b42318">${esc(hol)}</span>`:''}</div>
+   <div class="week-entry">${esc(statusText(it))}${dm?` · <b>${esc(detailHoursText(dm))}</b>`:''}${hol?`<div class="holiday-note">Feiertag</div>`:''}</div>
+   <button class="week-add">+ Schicht</button>`;
+  e.querySelector('.week-entry').onclick=()=>{view.selectedDate=k;openDetail(k)};
+  e.querySelector('.week-add').onclick=()=>{view.selectedDate=k;openDetail(k)};
+  weekStrip.appendChild(e)
+ }
+ weekHours.textContent=detailHoursText(total)
+}
+function setMode(m){
+ view.mode=m;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+ weekControls.classList.toggle('hidden',m!=='week');
+ monthCalendar.classList.toggle('hidden',m!=='quick');
+ detailList.classList.toggle('hidden',m!=='detail');
+ quickToolsPanel.classList.toggle('hidden',m!=='quick');
+ if(m==='quick'){
+  calendarViewTitle.textContent='Kalender — Schnell ausfüllen';
+  viewInstructions.innerHTML='Unten eine Schicht wählen und Tage <b>antippen</b> – oder mit Finger/Maus <b>über mehrere Tage ziehen</b>. Nochmals tippen = löschen. Für zwei Schichten an einem Tag <b>➕ 2. Schicht</b> einschalten. <b>Lange drücken</b> oder Rechtsklick = Details (eigene Zeiten).'
+ }else if(m==='week'){
+  calendarViewTitle.textContent='Kalender — Woche';
+  viewInstructions.innerHTML='Tag antippen → Schicht wählen. Zwei Schichten an einem Tag sind möglich. Woche wechseln mit ‹ oder ›.';
+  if(!view.weekStart)view.weekStart=startOfWeek(new Date(view.y,view.m,1));
+ }else{
+  calendarViewTitle.textContent='Kalender — Tagesliste';
+  viewInstructions.innerHTML='Tag antippen → Schicht wählen, Zeiten <b>schnell tippen</b> (z. B. <code>630-15</code>, <code>2230-7 p3</code>, <code>630-14 / 1430-2230</code>) und mit Enter zum nächsten Tag. In der Leiste die <b>Enden ziehen</b> = Beginn/Ende, den <b>gestreiften Block ziehen</b> = Pause (15-Min.-Schritte).';
+  if(!view.selectedDate||dateFromKey(view.selectedDate).getMonth()!==view.m)view.selectedDate=keyDate(new Date(view.y,view.m,1));
+ }
+ renderWeek();renderDetailList()
+}
+
+function timeAdd(t,delta){
+ if(!t)return t;let n=(mins(t)+delta)%1440;if(n<0)n+=1440;return `${pad(Math.floor(n/60))}:${pad(n%60)}`
+}
+function timelineMinute(t){
+ let n=mins(t)-360;if(n<0)n+=1440;return n
+}
+function shiftStyleClass(s){
+ const x=((s?.label||'')+' '+(s?.start||'')+' '+(s?.end||'')).toLowerCase();
+ if(x.includes('früh lang')||(s?.start==='06:30'&&s?.end==='15:00'))return 'fruehlang';
+ if(x.includes('früh')||(s?.start==='06:30'&&s?.end==='14:00'))return 'frueh';
+ if(x.includes('spät lang')||(s?.start==='14:30'&&s?.end==='23:00'))return 'spaetlang';
+ if(x.includes('spät')||(s?.start==='14:30'&&s?.end==='22:30'))return 'spaet';
+ return ''
+}
+function timelineBar(s,idx,k){
+ if(!s?.start||!s?.end)return '';
+ const left=timelineMinute(s.start)/1440*100,w=Math.min(100-left,duration(s.start,s.end)/1440*100);
+ let pause='';
+ if(s.p1&&s.p2){
+  const ps=(timelineMinute(s.p1)-timelineMinute(s.start)+1440)%1440;
+  const pw=duration(s.p1,s.p2);
+  if(ps<=duration(s.start,s.end))pause=`<span class="pause-stripe" data-drag="pause" data-idx="${idx}" data-date="${k}" style="left:${ps/duration(s.start,s.end)*100}%;width:${Math.max(1,pw/duration(s.start,s.end)*100)}%"></span>`
+ }
+ return `<div class="detail-bar ${shiftStyleClass(s)}" style="left:${left}%;width:${w}%"><span class="detail-handle left" data-drag="start" data-idx="${idx}" data-date="${k}"></span>${esc(s.start)}–${esc(s.end)}${pause}<span class="detail-handle right" data-drag="end" data-idx="${idx}" data-date="${k}"></span></div>`
+}
+function detailEditorHTML(k,it){
+ const s1=it?.s1,s2=it?.s2;
+ const pills=[
+  ['nacht','🌙 22:30–07:00'],['frueh','🌅 06:30–14:00'],['fruehlang','🌄 06:30–15:00'],['spaet','🌆 14:30–22:30'],['spaetlang','🌃 14:30–23:00'],['urlaub','🏖️ Urlaub'],['urlaubhalb','🏖️ 0,5 Urlaub'],['azk','⏱️ AZK'],['azkhalb','⏱️ 0,5 AZK'],['frei','🟠 Frei']
+ ];
+ const pillhtml=pills.map(([id,l])=>`<button class="detail-pill ${id}" data-dpreset="${id}">${l}</button>`).join('');
+ let adjust='';
+ if(s1){
+  adjust+=`<div class="detail-adjust"><b>Schicht 1:</b> &nbsp;${esc(s1.start)}–${esc(s1.end)}${s1.p1&&s1.p2?` · Pause ${esc(s1.p1)}–${esc(s1.p2)}`:''}
+   <div class="adjust-row"><span class="label">BEGINN</span><button data-adjust="s1,start,-15">−15</button><button data-adjust="s1,start,15">+15</button>
+   <span class="label">ENDE</span><button data-adjust="s1,end,-15">−15</button><button data-adjust="s1,end,15">+15</button><button data-adjust="s1,end,30">+30</button>
+   <span class="label">PAUSE</span><button data-adjust="s1,pause,-15">◀ 15</button><button data-adjust="s1,pause,15">15 ▶</button></div></div>`
+ }
+ if(s2){
+  adjust+=`<div class="detail-adjust"><b>Schicht 2:</b> &nbsp;${esc(s2.start)}–${esc(s2.end)}${s2.p1&&s2.p2?` · Pause ${esc(s2.p1)}–${esc(s2.p2)}`:''}
+   <div class="adjust-row"><span class="label">BEGINN</span><button data-adjust="s2,start,-15">−15</button><button data-adjust="s2,start,15">+15</button>
+   <span class="label">ENDE</span><button data-adjust="s2,end,-15">−15</button><button data-adjust="s2,end,15">+15</button>
+   <span class="label">PAUSE</span><button data-adjust="s2,pause,-15">◀ 15</button><button data-adjust="s2,pause,15">15 ▶</button></div></div>`
+ }
+ const second=['nacht','frueh','fruehlang','spaet','spaetlang'].map(id=>{const s=shifts.find(x=>x.id===id);return `<button class="detail-pill ${id}" data-secondpreset="${id}">${s.label.replace(/^[^ ]+ /,'')} ${s.start}–${s.end}</button>`}).join('');
+ return `<div class="detail-editor">
+  <div class="detail-quickline"><input data-detail-input="${k}" placeholder="Schnell tippen: 630-15 · 2230-7 p3 · 630-14 / 1430-2230 · u = Urlaub · uh = 0,5 Urlaub · a = AZK · ah = 0,5 AZK · 0 = frei"><button class="primary" data-quickapply="${k}">↵ Übernehmen</button></div>
+  <div class="detail-pills">${pillhtml}</div>${adjust}
+  <div class="second-picks"><b>➕ 2. Schicht:</b>${second}</div>
+  <div class="detail-bottom"><button data-daynav="-1">↑ Voriger Tag</button><button data-daynav="1">↓ Nächster Tag</button><button data-likeprev="${k}">⧉ Wie Vortag</button><button data-openmodal="${k}">… Details / Entlohnungsart</button><button data-inlineundo="1">↶ Rückgängig</button></div>
+ </div>`
+}
+function renderDetailList(){
+ if(!detailList)return;
+ let out=`<div class="detail-scale"><div></div><div class="detail-scale-line"><span>06</span><span>10</span><span>14</span><span>18</span><span>22</span><span>02</span><span>06</span></div><div style="text-align:right">Std.</div></div>`;
+ const days=new Date(view.y,view.m+1,0).getDate();
+ for(let day=1;day<=days;day++){
+  const d=new Date(view.y,view.m,day),k=keyDate(d),it=state.days[k]||null,open=view.selectedDate===k,dm=dayMinutes(it),hol=holidayFor(d);
+  out+=`<div class="detail-day ${open?'open':''}" data-detailday="${k}">
+   <div class="detail-row" data-opendetail="${k}">
+    <div class="detail-day-label">${dowShort[d.getDay()]}<b>${day}</b>${hol?`<div style="color:#b42318;font-size:9px">${esc(hol)}</div>`:''}</div>
+    <div class="timeline">${it?.status?`<div style="padding:10px 12px;font-size:12px;color:#475467">${esc(statusText(it))}</div>`:(timelineBar(it?.s1,1,k)+timelineBar(it?.s2,2,k))}</div>
+    <div class="detail-hours">${dm?esc(detailHoursText(dm)):''}</div>
+   </div>${open?detailEditorHTML(k,it):''}
+  </div>`
+ }
+ detailList.innerHTML=out;bindDetailList()
+}
+function detailPresetToDay(k,id,second=false){
+ const s=shifts.find(x=>x.id===id);if(!s)return;snap();
+ if(s.status){state.days[k]={status:s.status,payType:state.days[k]?.payType||''}}
+ else{
+  const v={label:s.short,start:s.start,end:s.end,p1:s.p1,p2:s.p2},cur=state.days[k]||{};cur.status=null;
+  if(second){if(cur.s1)cur.s2=v;else cur.s1=v}else{cur.s1=v}
+  state.days[k]=cur
+ }
+ save();renderAll()
+}
+function adjustDetailShift(k,which,field,delta){
+ const it=state.days[k],s=it?.[which];if(!s)return;snap();
+ if(field==='pause'){if(s.p1)s.p1=timeAdd(s.p1,delta);if(s.p2)s.p2=timeAdd(s.p2,delta)}
+ else s[field]=timeAdd(s[field],delta);
+ save();renderAll()
+}
+function parseQuickTime(x){
+ x=(x||'').trim();if(!x)return null;if(x.includes(':')){const [h,m='0']=x.split(':');return `${pad(+h)}:${pad(+m)}`}
+ const n=x.replace(/\D/g,'');if(!n)return null;
+ if(n.length<=2)return `${pad(+n)}:00`;
+ if(n.length===3)return `0${n[0]}:${n.slice(1)}`;
+ return `${n.slice(0,2)}:${n.slice(2,4)}`
+}
+function quickSpecShift(spec){
+ spec=spec.trim();let pm=spec.match(/\bp(\d{1,4})\b/i),p1=pm?parseQuickTime(pm[1]):'',p2=p1?timeAdd(p1,30):'';
+ spec=spec.replace(/\bp\d{1,4}\b/ig,'').trim();
+ const m=spec.match(/^(\d{1,4}(?::\d{1,2})?)\s*-\s*(\d{1,4}(?::\d{1,2})?)$/);if(!m)return null;
+ const start=parseQuickTime(m[1]),end=parseQuickTime(m[2]),preset=shifts.find(s=>!s.status&&s.start===start&&s.end===end);
+ return {label:preset?.short||'Manuell',start,end,p1:p1||(preset?.p1||''),p2:p2||(preset?.p2||'')}
+}
+function applyDetailQuickText(k){
+ const input=detailList.querySelector(`[data-detail-input="${k}"]`);if(!input)return;const v=input.value.trim().toLowerCase();if(!v)return;
+ snap();
+ if(v==='u'||v==='urlaub')state.days[k]={status:'Urlaub',payType:state.days[k]?.payType||''};
+ else if(v==='uh'||v==='0,5 urlaub'||v==='0.5 urlaub'||v==='urlaub halb'||v==='halber urlaub')state.days[k]={status:'Urlaub halb',payType:state.days[k]?.payType||''};
+ else if(v==='0'||v==='frei')state.days[k]={status:'Frei',payType:state.days[k]?.payType||''};
+ else if(v==='k'||v==='krank')state.days[k]={status:'Krank',payType:state.days[k]?.payType||''};
+ else if(v==='a'||v==='azk')state.days[k]={status:'AZK',payType:state.days[k]?.payType||''};
+ else if(v==='ah'||v==='0,5 azk'||v==='0.5 azk'||v==='azk halb')state.days[k]={status:'AZK halb',payType:state.days[k]?.payType||''};
+ else{
+  const parts=v.split('/').map(x=>x.trim()).filter(Boolean),a=quickSpecShift(parts[0]),b=parts[1]?quickSpecShift(parts[1]):null;
+  if(!a){history.pop();return toast('Zeiten nicht erkannt')}
+  state.days[k]={status:null,s1:a,s2:b,payType:state.days[k]?.payType||''}
+ }
+ save();renderAll()
+}
+function copyPrevInline(k){
+ const d=dateFromKey(k);d.setDate(d.getDate()-1);const v=state.days[keyDate(d)];if(!v)return toast('Vortag ist leer');snap();state.days[k]=JSON.parse(JSON.stringify(v));save();renderAll();toast('Vortag kopiert')
+}
+function moveInlineDay(delta){
+ const d=dateFromKey(view.selectedDate);d.setDate(d.getDate()+delta);
+ if(d.getMonth()!==view.m)return;view.selectedDate=keyDate(d);renderDetailList()
+}
+function bindDetailDrag(){
+ detailList.querySelectorAll('[data-drag]').forEach(h=>{
+  h.onpointerdown=e=>{
+   e.preventDefault();e.stopPropagation();const k=h.dataset.date,idx=+h.dataset.idx,kind=h.dataset.drag,row=h.closest('.timeline'),sx=e.clientX;
+   const up=ev=>{window.removeEventListener('pointerup',up);let steps=Math.round((ev.clientX-sx)/row.getBoundingClientRect().width*1440/15),delta=steps*15;if(!delta)return;
+    const which=idx===1?'s1':'s2';if(kind==='pause')adjustDetailShift(k,which,'pause',delta);else adjustDetailShift(k,which,kind,delta)
+   };window.addEventListener('pointerup',up,{once:true})
+  }
+ })
+}
+function bindDetailList(){
+ detailList.querySelectorAll('[data-opendetail]').forEach(x=>x.onclick=e=>{if(e.target.closest('[data-drag]'))return;view.selectedDate=x.dataset.opendetail;renderDetailList()});
+ detailList.querySelectorAll('[data-dpreset]').forEach(b=>b.onclick=()=>detailPresetToDay(view.selectedDate,b.dataset.dpreset,false));
+ detailList.querySelectorAll('[data-secondpreset]').forEach(b=>b.onclick=()=>detailPresetToDay(view.selectedDate,b.dataset.secondpreset,true));
+ detailList.querySelectorAll('[data-adjust]').forEach(b=>b.onclick=()=>{const [w,f,d]=b.dataset.adjust.split(',');adjustDetailShift(view.selectedDate,w,f,+d)});
+ detailList.querySelectorAll('[data-quickapply]').forEach(b=>b.onclick=()=>applyDetailQuickText(b.dataset.quickapply));
+ detailList.querySelectorAll('[data-detail-input]').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();applyDetailQuickText(i.dataset.detailInput);setTimeout(()=>moveInlineDay(1),0)}});
+ detailList.querySelectorAll('[data-daynav]').forEach(b=>b.onclick=()=>moveInlineDay(+b.dataset.daynav));
+ detailList.querySelectorAll('[data-likeprev]').forEach(b=>b.onclick=()=>copyPrevInline(b.dataset.likeprev));
+ detailList.querySelectorAll('[data-openmodal]').forEach(b=>b.onclick=()=>openDetail(b.dataset.openmodal));
+ detailList.querySelectorAll('[data-inlineundo]').forEach(b=>b.onclick=undoAction);
+ bindDetailDrag()
+}
+
+function applyQuick(k){
+ const s=shifts.find(x=>x.id===view.selectedShift);if(!s)return;view.selectedDate=k;let cur=state.days[k];
+ if(s.status&&cur?.status===s.status){snap();delete state.days[k];save();renderAll();return}
+ if(!s.status&&cur&&!view.second&&cur.s1?.start===s.start&&cur.s1?.end===s.end&&!cur.s2){snap();delete state.days[k];save();renderAll();return}
+ snap();
+ if(s.status)state.days[k]={status:s.status,payType:cur?.payType||''};
+ else{
+  const dst={label:s.short,start:s.start,end:s.end,p1:s.p1,p2:s.p2};cur=cur||{};cur.status=null;
+  if(view.second&&cur.s1)cur.s2=dst;else{cur.s1=dst;if(!view.second)cur.s2=cur.s2||null}state.days[k]=cur
+ }
+ save();renderAll()
+}
+function bindCalendarPointer(){
+ calendar.onpointerdown=e=>{const c=e.target.closest('.day');if(!c||e.button===2)return;drag=true;dragged.clear();longTriggered=false;longTimer=setTimeout(()=>{if(drag){longTriggered=true;drag=false;openDetail(c.dataset.date)}},650)};
+ calendar.onpointerover=e=>{if(!drag||longTriggered)return;const c=e.target.closest('.day');if(!c)return;clearTimeout(longTimer);if(!dragged.has(c.dataset.date)){dragged.add(c.dataset.date);applyQuick(c.dataset.date)}};
+ calendar.onpointerup=e=>{clearTimeout(longTimer);const c=e.target.closest('.day');if(!longTriggered&&c&&dragged.size===0)applyQuick(c.dataset.date);drag=false;dragged.clear()};
+ calendar.onpointercancel=()=>{clearTimeout(longTimer);drag=false;dragged.clear()};
+ calendar.oncontextmenu=e=>{const c=e.target.closest('.day');if(!c)return;e.preventDefault();openDetail(c.dataset.date)}
+}
+function openDetail(k){
+ view.selectedDate=k;const d=dateFromKey(k),it=state.days[k]||{};detailTitle.textContent=`${dowLong[d.getDay()]}, ${d.getDate()}. ${months[d.getMonth()]} ${d.getFullYear()} (${dowShort[d.getDay()]})`;
+ loadDetailFields(it);detailModal.classList.remove('hidden');updateDetailHours()
+}
+function loadDetailFields(it){
+ const a=it.s1||{},b=it.s2||{};s1start.value=a.start||'';s1end.value=a.end||'';s1p1.value=a.p1||'';s1p2.value=a.p2||'';
+ s2start.value=b.start||'';s2end.value=b.end||'';s2p1.value=b.p1||'';s2p2.value=b.p2||'';payType.value=it.payType||'';
+ detailSecondToggle.checked=!!it.s2;shift2Box.classList.toggle('hidden',!detailSecondToggle.checked)
+}
+function updateDetailHours(){
+ const s1=s1start.value&&s1end.value?{start:s1start.value,end:s1end.value,p1:s1p1.value,p2:s1p2.value}:null;
+ const s2=detailSecondToggle.checked&&s2start.value&&s2end.value?{start:s2start.value,end:s2end.value,p1:s2p1.value,p2:s2p2.value}:null;
+ detailHours.textContent=fmtHoursCompact(shiftMinutes(s1)+shiftMinutes(s2)).replace(' h',' Std.')
+}
+function applyPreset(i){
+ const p=detailPresets[i];s1start.value=p.start;s1end.value=p.end;s1p1.value=p.p1;s1p2.value=p.p2;document.querySelectorAll('[data-preset]').forEach((b,j)=>b.classList.toggle('selected',j===i));updateDetailHours()
+}
+function saveDetail(){
+ if(!view.selectedDate)return;const old=state.days[view.selectedDate]||{},s1=s1start.value&&s1end.value?{label:'Manuell',start:s1start.value,end:s1end.value,p1:s1p1.value,p2:s1p2.value}:null;
+ const s2=detailSecondToggle.checked&&s2start.value&&s2end.value?{label:'Manuell',start:s2start.value,end:s2end.value,p1:s2p1.value,p2:s2p2.value}:null;snap();
+ if(!s1&&!s2&&!old.status&&!payType.value.trim())delete state.days[view.selectedDate];else state.days[view.selectedDate]={status:old.status||null,s1,s2,payType:payType.value.trim()};
+ save();detailModal.classList.add('hidden');renderAll();toast('Tag gespeichert')
+}
+function shiftDetailDay(delta){if(!view.selectedDate)return;saveDetailSilent();const d=dateFromKey(view.selectedDate);d.setDate(d.getDate()+delta);view.selectedDate=keyDate(d);openDetail(view.selectedDate)}
+function saveDetailSilent(){
+ if(!view.selectedDate)return;const old=state.days[view.selectedDate]||{},s1=s1start.value&&s1end.value?{label:'Manuell',start:s1start.value,end:s1end.value,p1:s1p1.value,p2:s1p2.value}:null;
+ const s2=detailSecondToggle.checked&&s2start.value&&s2end.value?{label:'Manuell',start:s2start.value,end:s2end.value,p1:s2p1.value,p2:s2p2.value}:null;
+ if(s1||s2||old.status||payType.value.trim())state.days[view.selectedDate]={status:old.status||null,s1,s2,payType:payType.value.trim()};save()
+}
+function copyPrevDetail(){
+ const d=dateFromKey(view.selectedDate);d.setDate(d.getDate()-1);const v=state.days[keyDate(d)];if(!v)return toast('Vortag ist leer');snap();state.days[view.selectedDate]=JSON.parse(JSON.stringify(v));save();loadDetailFields(state.days[view.selectedDate]);updateDetailHours();toast('Vortag kopiert')
+}
+function repeatFirstWeek(){
+  const daysInMonth=new Date(view.y,view.m+1,0).getDate();
+
+  // Original-Logik: Es geht ausdrücklich um die Kalendertage 1–7.
+  let hasAny=false;
+  for(let day=1;day<=7;day++){
+    const k=keyDate(new Date(view.y,view.m,day));
+    if(state.days[k]){hasAny=true;break}
+  }
+  if(!hasAny){
+    toast('Zuerst Tag 1–7 ausfüllen');
+    return;
+  }
+
+  snap();
+
+  // Muster der Tage 1–7 auf den restlichen Monat übertragen.
+  for(let targetDay=8;targetDay<=daysInMonth;targetDay++){
+    const sourceDay=((targetDay-1)%7)+1;
+    const sourceKey=keyDate(new Date(view.y,view.m,sourceDay));
+    const targetKey=keyDate(new Date(view.y,view.m,targetDay));
+    const value=state.days[sourceKey];
+
+    if(value){
+      state.days[targetKey]=JSON.parse(JSON.stringify(value));
+    }else{
+      // Ein leerer Tag in 1–7 bleibt auch in den Wiederholungswochen leer.
+      delete state.days[targetKey];
+    }
+  }
+
+  save();
+  renderAll();
+  toast('Erste Woche wiederholt');
+}
+function copyWeekNext(){
+ snap();for(let i=0;i<7;i++){const s=new Date(view.weekStart);s.setDate(s.getDate()+i);const d=new Date(s);d.setDate(d.getDate()+7);const v=state.days[keyDate(s)];if(v)state.days[keyDate(d)]=JSON.parse(JSON.stringify(v))}
+ save();view.weekStart=new Date(view.weekStart);view.weekStart.setDate(view.weekStart.getDate()+7);renderAll();toast('Woche kopiert')
+}
+function renderPrint(){
+ const days=31;let rows='',total=0,entries=0;
+ for(let day=1;day<=days;day++){const valid=day<=new Date(view.y,view.m+1,0).getDate(),d=valid?new Date(view.y,view.m,day):null,k=d?keyDate(d):'',it=k?state.days[k]:null,hol=d?holidayFor(d):'';
+  let start='',end='',p1='',p2='',work='',note='';
+  if(valid&&it){
+   entries++;
+   if(it.status){
+    note=it.status==='Urlaub halb'?'0,5 Tag Urlaub':it.status==='AZK halb'?'0,5 AZK':it.status;
+    if(it.status==='Urlaub'){work='8';total+=8*60}
+    if(it.status==='Urlaub halb'){work='4';total+=4*60}
+    if(it.status==='Krank'){work='8';total+=8*60}
+    if(it.status==='AZK'){work='8';total+=8*60}
+    if(it.status==='AZK halb'){work='4';total+=4*60}
+   }
+   else{
+    if(it.s1){start=it.s1.start||'';end=it.s1.end||'';p1=it.s1.p1||'';p2=it.s1.p2||''}
+    if(it.s2){start+=(start?' / ':'')+(it.s2.start||'');end+=(end?' / ':'')+(it.s2.end||'');p1+=(p1?' / ':'')+(it.s2.p1||'');p2+=(p2?' / ':'')+(it.s2.p2||'')}
+    const n=dayMinutes(it);total+=n;work=n?String(n/60).replace('.',','):''
+   }
+   if(it.payType)note+=(note?' · ':'')+it.payType
+  }
+  if(hol)note+=(note?' · ':'')+'Feiertag – '+hol;
+  rows+=`<tr><td>${day}</td><td>${esc(start)}</td><td>${esc(end)}</td><td>${esc(p1)}</td><td>${esc(p2)}</td><td>${esc(work)}</td><td>${esc(note)}</td></tr>`
+ }
+ printInfo.textContent=`Erzeugt: ${months[view.m]} ${view.y} — ${fmtHours(total)} gesamt.`;
+ printSheet.innerHTML=`<div class="print-official-header official-only"><svg class="print-logo-square-svg" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true"><rect x="0" y="0" width="13" height="13" rx="2" fill="#d64045"/></svg><span class="print-logo-name">SEKHIL</span><span class="print-logo-sub">Aufzeichnung von Arbeitszeiten nach dem MiLoG</span></div>
+ <h2 class="simple-print-title simple-only">Aufzeichnung von Arbeitszeiten nach dem MiLoG</h2>
+ <div class="print-meta">
+  <div class="line"><b>Mandanten-Nr. / Arbeitgebername:</b><span>${esc(state.meta.clientNo)} / ${esc(state.meta.employer)}</span></div>
+  <div class="line"><b>Pers.Nr. / Arbeitnehmername:</b><span>${esc(state.meta.personNo)} / ${esc(state.meta.employee)}</span></div>
+  <div class="line"><b>Stundenlohn:</b><span>${state.meta.hourlyWage?esc(state.meta.hourlyWage)+' € / Std.':'—'}</span></div>
+  <div class="line"><b>Bescheinigungsmonat:</b><span>${months[view.m]} ${view.y}</span></div>
+ </div>
+ <div class="print-checks">
+  ${state.meta.empType==='mini'?'☒':'☐'} Geringfügige Beschäftigung (Minijob)<br>
+  ${state.meta.empType==='part'?'☒':'☐'} Teilzeit:&nbsp; ${state.meta.empType==='part'&&state.meta.partHours==='20'?'☒':'☐'} 20 Std.&nbsp; ${state.meta.empType==='part'&&state.meta.partHours==='25'?'☒':'☐'} 25 Std.&nbsp; ${state.meta.empType==='part'&&state.meta.partHours==='30'?'☒':'☐'} 30 Std.&nbsp; ${state.meta.empType==='part'&&state.meta.partHours==='35'?'☒':'☐'} 35 Std.&nbsp; ${state.meta.empType==='part'&&state.meta.partHours==='other'?'☒':'☐'} Andere${state.meta.empType==='part'&&state.meta.partHours==='other'&&state.meta.partOther?': '+esc(state.meta.partOther)+' Std.':''}<br>
+  ${state.meta.empType==='full'?'☒':'☐'} Vollzeit – 40 Std./Woche
+ </div>
+ <table class="print-table"><thead><tr><th>Tag</th><th>Arbeitsbeginn</th><th>Arbeitsende</th><th>Pausenzeiten<br>von</th><th>Pausenzeiten<br>bis</th><th>Arbeitszeit</th><th>Entlohnungsart / Hinweis</th></tr></thead>
+ <tbody>${rows}</tbody><tfoot><tr><th colspan="5">Summe Arbeitsstunden:</th><th>${String(total/60).replace('.',',')}</th><th></th></tr></tfoot></table>
+ <div class="sig"><div>Unterschrift Arbeitnehmer</div><div>Unterschrift Arbeitgeber</div></div>`
+}
+function renderAll(){renderShiftBar();renderCalendar();renderWeek();renderDetailList();renderPrint();bindCalendarPointer()}
+function changeMonth(delta){view.m+=delta;if(view.m<0){view.m=11;view.y--}if(view.m>11){view.m=0;view.y++}if(view.mode==='week')view.weekStart=startOfWeek(new Date(view.y,view.m,1));if(view.mode==='detail')view.selectedDate=keyDate(new Date(view.y,view.m,1));renderAll()}
+function moveSelected(delta){let d=view.selectedDate?dateFromKey(view.selectedDate):new Date(view.y,view.m,1);d.setDate(d.getDate()+delta);view.selectedDate=keyDate(d);view.y=d.getFullYear();view.m=d.getMonth();renderAll()}
+function keyHandler(e){
+ if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undoAction();return}
+ if(e.key==='ArrowLeft'){e.preventDefault();moveSelected(-1);return}if(e.key==='ArrowRight'){e.preventDefault();moveSelected(1);return}
+ if(e.key==='ArrowUp'){e.preventDefault();moveSelected(-7);return}if(e.key==='ArrowDown'){e.preventDefault();moveSelected(7);return}
+ const map={'1':'nacht','2':'frueh','3':'fruehlang','4':'spaet','5':'spaetlang'};if(map[e.key]){view.selectedShift=map[e.key];renderShiftBar();if(view.selectedDate)applyQuick(view.selectedDate);return}
+ if(e.key.toLowerCase()==='u'){view.selectedShift='urlaub';renderShiftBar();if(view.selectedDate)applyQuick(view.selectedDate);return}
+ if(e.key==='0'&&view.selectedDate){snap();delete state.days[view.selectedDate];save();renderAll();return}if(e.key==='+'){view.second=!view.second;renderShiftBar()}
+}
+function bind(){
+ tabCal.onclick=()=>showTab('cal');tabPrint.onclick=()=>showTab('print');tabBackup.onclick=()=>{syncMeta();showTab('backup')};
+ prevMonth.onclick=()=>changeMonth(-1);nextMonth.onclick=()=>changeMonth(1);monthSelect.onchange=()=>{view.m=+monthSelect.value;if(view.mode==='week')view.weekStart=startOfWeek(new Date(view.y,view.m,1));if(view.mode==='detail')view.selectedDate=keyDate(new Date(view.y,view.m,1));renderAll()};yearSelect.onchange=()=>{view.y=+yearSelect.value;if(view.mode==='week')view.weekStart=startOfWeek(new Date(view.y,view.m,1));if(view.mode==='detail')view.selectedDate=keyDate(new Date(view.y,view.m,1));renderAll()};
+ document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+ [clientNo,employer,personNo,employee,hourlyWage,stateSelect].forEach(x=>x.onchange=()=>{pullMeta();renderAll()});
+ secondShift.onclick=()=>{
+  view.second=!view.second;
+  renderShiftBar();
+  secondShift.textContent=view.second?'➕ 2. Schicht: AN':'➕ 2. Schicht';
+  toast(view.second?'Tippen fügt jetzt eine zweite Schicht hinzu':'Zweite Schicht aus');
+};undo.onclick=undoAction;undoWeek.onclick=undoAction;repeatWeek.onclick=repeatFirstWeek;
+ prevWeek.onclick=()=>{view.weekStart=new Date(view.weekStart);view.weekStart.setDate(view.weekStart.getDate()-7);renderWeek()};nextWeek.onclick=()=>{view.weekStart=new Date(view.weekStart);view.weekStart.setDate(view.weekStart.getDate()+7);renderWeek()};
+ todayWeek.onclick=()=>{view.weekStart=startOfWeek(new Date());renderWeek()};copyWeek.onclick=copyWeekNext;
+ closeDetail.onclick=()=>detailModal.classList.add('hidden');detailModal.onclick=e=>{if(e.target===detailModal)detailModal.classList.add('hidden')};
+ detailSecondToggle.onchange=()=>{shift2Box.classList.toggle('hidden',!detailSecondToggle.checked);if(!detailSecondToggle.checked){s2start.value=s2end.value=s2p1.value=s2p2.value=''}updateDetailHours()};
+ [s1start,s1end,s1p1,s1p2,s2start,s2end,s2p1,s2p2].forEach(x=>x.oninput=updateDetailHours);
+ detailDone.onclick=saveDetail;detailPrev.onclick=()=>shiftDetailDay(-1);detailNext.onclick=()=>shiftDetailDay(1);detailCopyPrev.onclick=copyPrevDetail;
+ detailDelete.onclick=()=>{if(!view.selectedDate)return;snap();delete state.days[view.selectedDate];save();detailModal.classList.add('hidden');renderAll();toast('Tag gelöscht')};
+ function runPrint(mode){
+ document.body.classList.remove('print-official','print-simple');
+ document.body.classList.add(mode==='official'?'print-official':'print-simple');
+ window.print();
+}
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-official','print-simple'));
+officialPrint.onclick=()=>runPrint('official');simplePrint.onclick=()=>runPrint('simple');
+ [empMini,empPart,empFull].forEach(x=>x.onchange=()=>updateEmploymentUI());
+ [part20,part25,part30,part35,partOtherRadio].forEach(x=>x.onchange=()=>{empPart.checked=true;updateEmploymentUI();if(x===partOtherRadio)partOtherHours.focus()});
+ partOtherHours.oninput=()=>{if(partOtherHours.value){empPart.checked=true;partOtherRadio.checked=true;updateEmploymentUI()}};
+ saveMeta.onclick=()=>{snap();state.meta.clientNo=bClientNo.value.trim();state.meta.employer=bEmployer.value.trim();state.meta.personNo=bPersonNo.value.trim();state.meta.employee=bEmployee.value.trim();state.meta.hourlyWage=bHourlyWage.value.trim();state.meta.state=bStateSelect.value;pullEmploymentFromBackup();save();syncMeta();renderAll();toast('Kopfdaten gespeichert')};
+ exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`SEKHIL_Stundenkalender_Backup_${view.y}-${pad(view.m+1)}.json`;a.click();URL.revokeObjectURL(a.href)};
+ importJson.onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!x.meta||!x.days)throw new Error();if(!x.meta.empType&&x.meta.mini)x.meta.empType='mini';snap();state=x;save();syncMeta();renderAll();toast('Backup importiert')}catch{alert('Ungültiges SEKHIL-Backup.')}finally{e.target.value=''}};
+ deleteMonth.onclick=()=>{if(!confirm(`${months[view.m]} ${view.y} wirklich löschen?`))return;snap();Object.keys(state.days).forEach(k=>{const d=dateFromKey(k);if(d.getFullYear()===view.y&&d.getMonth()===view.m)delete state.days[k]});save();renderAll();toast('Monat gelöscht')};
+ document.addEventListener('keydown',keyHandler)
+}
+init()
+})();
+</script>
+</body>
+</html>
